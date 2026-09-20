@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Bài tự phản tư về khám phá bản thân, cam kết và áp lực liên quan đến bản sắc." />
+  <title>Tự phản tư — Identity & Wellbeing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="inner-page">
+  <header class="site-header"><nav class="nav container"><a class="brand" href="index.html"><span class="brand-mark">◎</span><span>IDENTITY & WELLBEING</span></a><div class="nav-links"><a href="index.html#about">Chủ đề</a><a href="index.html#articles">Bài viết</a><a href="nghien-cuu.html">Nghiên cứu</a><a class="active-link" href="tu-phan-tu.html">Tự phản tư</a></div><a class="mobile-back" href="index.html">← Trang chủ</a></nav></header>
+
+  <main>
+    <section class="page-hero purple-hero section-pad">
+      <div class="container page-hero-grid">
+        <div><div class="section-kicker light-kicker">TỰ PHẢN TƯ</div><h1>Tôi đang ở đâu<br /><em>trong hành trình hiểu mình?</em></h1><p>12 câu hỏi ngắn để quan sát ba khía cạnh: <strong>khám phá</strong>, <strong>cam kết</strong> và <strong>áp lực về bản sắc</strong>.</p></div>
+        <img class="page-hero-art" src="images/reflection-mirror.svg" alt="Minh họa chiếc gương phản chiếu bản thân" /></div>
+    </section>
+
+    <section class="section-pad">
+      <div class="container quiz-shell">
+        <div class="quiz-intro"><span class="quiz-badge">KHÔNG CHẨN ĐOÁN</span><p>Đây là công cụ tự phản tư do website xây dựng, lấy cảm hứng từ các khái niệm nghiên cứu về bản sắc. Nó <strong>không phải thang đo chuẩn hóa</strong> và không thể xác định bạn có “khủng hoảng bản sắc” hay một rối loạn tâm lý.</p></div>
+        <form id="reflectionForm" class="quiz-form">
+          <div id="questions"></div>
+          <button class="btn btn-primary quiz-submit" type="submit">Xem phản hồi của tôi <span>→</span></button>
+        </form>
+        <div id="quizResult" class="quiz-result" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="soft-section section-pad">
+      <div class="container reflection-prompts">
+        <div><div class="section-kicker">SAU KHI LÀM XONG</div><h2>Đừng vội hỏi “mình thuộc trạng thái nào?”.<br /><em>Hãy hỏi “mình muốn khám phá gì tiếp?”</em></h2></div>
+        <div class="prompt-list"><div><b>01</b><p>Điều gì gần đây khiến mình thay đổi cách nhìn về bản thân?</p></div><div><b>02</b><p>Lựa chọn nào hiện tại là do mình muốn, và lựa chọn nào chịu ảnh hưởng mạnh từ kỳ vọng bên ngoài?</p></div><div><b>03</b><p>Nếu giảm bớt áp lực phải có câu trả lời ngay, bước thử nghiệm nhỏ nào mình muốn làm trong tuần này?</p></div></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer"><div class="container footer-top"><div><a class="brand footer-brand" href="index.html"><span class="brand-mark">◎</span><span>IDENTITY & WELLBEING</span></a><p>Một không gian để đọc, nghiên cứu và tự phản tư.</p></div><div class="footer-links"><a href="index.html#articles">Bài viết</a><a href="nghien-cuu.html">Nghiên cứu</a><a href="tu-phan-tu.html">Tự phản tư</a></div></div><div class="container footer-bottom"><span>Không thay thế chẩn đoán hoặc điều trị chuyên môn.</span><span>© 2026 Identity & Wellbeing</span></div></footer>
+
+  <script>
+    const questions = [
+      ['Khám phá', 'Tôi thường suy nghĩ về điều mình thật sự coi trọng trong cuộc sống.', 'explore'],
+      ['Khám phá', 'Tôi chủ động thử những trải nghiệm mới để hiểu mình phù hợp với điều gì.', 'explore'],
+      ['Khám phá', 'Tôi sẵn sàng xem xét lại một lựa chọn cũ nếu thấy nó không còn phù hợp.', 'explore'],
+      ['Khám phá', 'Tôi dành thời gian tìm hiểu nhiều hướng đi trước khi quyết định.', 'explore'],
+      ['Cam kết', 'Tôi có một số giá trị hoặc nguyên tắc mà mình muốn giữ nhất quán.', 'commit'],
+      ['Cam kết', 'Tôi cảm thấy tương đối rõ về những điều mình muốn theo đuổi trong thời gian tới.', 'commit'],
+      ['Cam kết', 'Tôi có thể giải thích vì sao một số lựa chọn hiện tại phù hợp với mình.', 'commit'],
+      ['Cam kết', 'Tôi cảm thấy mình đang từng bước xây dựng một hướng đi có ý nghĩa với bản thân.', 'commit'],
+      ['Áp lực', 'Tôi cảm thấy mình phải nhanh chóng biết mình là ai hoặc phải trở thành ai.', 'pressure'],
+      ['Áp lực', 'Kỳ vọng của người khác khiến tôi khó phân biệt điều mình muốn với điều mình “nên” muốn.', 'pressure'],
+      ['Áp lực', 'Khi tương lai chưa rõ ràng, tôi dễ cảm thấy căng thẳng hoặc mất phương hướng.', 'pressure'],
+      ['Áp lực', 'Tôi thường tự trách mình vì chưa có câu trả lời rõ ràng về tương lai.', 'pressure']
+    ];
+
+    const questionsWrap = document.getElementById('questions');
+    questions.forEach((q, i) => {
+      const field = document.createElement('fieldset');
+      field.className = 'question-card';
+      field.innerHTML = `<legend><span>${String(i + 1).padStart(2,'0')}</span><small>${q[0]}</small>${q[1]}</legend><div class="scale-row"><label><input required type="radio" name="q${i}" value="1">1<span>Hoàn toàn không đúng</span></label><label><input type="radio" name="q${i}" value="2">2<span>Ít đúng</span></label><label><input type="radio" name="q${i}" value="3">3<span>Phân vân</span></label><label><input type="radio" name="q${i}" value="4">4<span>Khá đúng</span></label><label><input type="radio" name="q${i}" value="5">5<span>Rất đúng</span></label></div>`;
+      questionsWrap.appendChild(field);
+    });
+
+    document.getElementById('reflectionForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const data = new FormData(e.target);
+      const sums = { explore: 0, commit: 0, pressure: 0 };
+      questions.forEach((q, i) => sums[q[2]] += Number(data.get(`q${i}`)));
+      const avgExplore = (sums.explore / 4).toFixed(1);
+      const avgCommit = (sums.commit / 4).toFixed(1);
+      const avgPressure = (sums.pressure / 4).toFixed(1);
+      const result = document.getElementById('quizResult');
+      let message = '';
+      if (Number(avgPressure) >= 3.8) message = 'Bạn đang ghi nhận khá nhiều áp lực quanh câu chuyện “mình phải là ai / phải biết gì về tương lai”. Hãy ưu tiên các bước nhỏ, giảm yêu cầu phải có câu trả lời ngay và tìm một người an toàn để trò chuyện nếu áp lực kéo dài.';
+      else if (Number(avgExplore) >= 3.8 && Number(avgCommit) < 3.2) message = 'Bạn có xu hướng khám phá khá mạnh trong khi cam kết vẫn đang hình thành. Điều này có thể phù hợp với một giai đoạn thử nghiệm và thu thập thêm thông tin, thay vì phải ép mình quyết định ngay.';
+      else if (Number(avgCommit) >= 3.8) message = 'Bạn đang ghi nhận cảm giác cam kết tương đối rõ với một số giá trị hoặc hướng đi. Vẫn có thể tiếp tục điều chỉnh chúng khi hoàn cảnh và bản thân thay đổi.';
+      else message = 'Điểm số cho thấy bạn đang có một trạng thái tương đối cân bằng giữa khám phá, cam kết và áp lực. Hãy xem kết quả như một lát cắt của thời điểm hiện tại.';
+      result.innerHTML = `<div class="result-head"><span>KẾT QUẢ TỰ PHẢN TƯ</span><button type="button" onclick="window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})">↓</button></div><div class="score-grid"><div><b>${avgExplore}</b><span>Khám phá / 5</span></div><div><b>${avgCommit}</b><span>Cam kết / 5</span></div><div><b>${avgPressure}</b><span>Áp lực / 5</span></div></div><p>${message}</p><small>Kết quả không phải chẩn đoán tâm lý. Nếu căng thẳng hoặc cảm giác bế tắc đang ảnh hưởng đáng kể đến đời sống, hãy cân nhắc tìm hỗ trợ chuyên môn.</small>`;
+      result.classList.add('show');
+    });
+  </script>
+</body>
+</html>

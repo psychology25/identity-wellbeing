@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 500">
+  <rect width="600" height="500" rx="42" fill="#ffffff" opacity=".08"/>
+  <g stroke="#9fdefe" stroke-width="2" opacity=".85"><path d="M90 110L260 190L460 110L510 310L330 370L130 300L90 110"/><path d="M260 190L330 370M460 110L330 370M130 300L460 110"/></g>
+  <g fill="#fff" stroke="#58c7ff" stroke-width="4"><circle cx="90" cy="110" r="11"/><circle cx="260" cy="190" r="14"/><circle cx="460" cy="110" r="11"/><circle cx="510" cy="310" r="11"/><circle cx="330" cy="370" r="14"/><circle cx="130" cy="300" r="11"/></g>
+  <g font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#fff"><text x="74" y="86">BẢN SẮC</text><text x="235" y="165">n = 352</text><text x="426" y="87">STRESS</text><text x="475" y="340">HỒI QUY</text><text x="291" y="405">TƯƠNG QUAN</text><text x="104" y="333">ĐỘ TIN CẬY</text></g>
+</svg>

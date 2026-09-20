@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 500">
+  <defs><linearGradient id="m" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#f2efff"/><stop offset="1" stop-color="#a98df4"/></linearGradient></defs>
+  <ellipse cx="300" cy="430" rx="190" ry="32" fill="#fff" opacity=".18"/>
+  <rect x="180" y="55" width="240" height="320" rx="120" fill="url(#m)" opacity=".96"/>
+  <rect x="198" y="72" width="204" height="286" rx="102" fill="#242157" opacity=".9"/>
+  <circle cx="300" cy="165" r="45" fill="#fff" opacity=".92"/>
+  <path d="M220 320c18-64 52-98 80-98s62 34 80 98" fill="#fff" opacity=".92"/>
+  <circle cx="126" cy="125" r="24" fill="#58c7ff" opacity=".8"/><circle cx="482" cy="182" r="14" fill="#fff" opacity=".75"/><circle cx="450" cy="350" r="24" fill="#cbbcff"/>
+  <text x="242" y="412" fill="#fff" font-family="Arial, sans-serif" font-size="20" font-weight="700">NHÌN LẠI MÌNH</text>
+</svg>

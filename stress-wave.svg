@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 360">
+  <rect width="900" height="360" rx="32" fill="#f5f4ff"/>
+  <path d="M40 255 C110 220, 132 245, 190 255 S280 225, 345 250 S445 292, 515 220 S635 100, 710 155 S780 240, 860 98" fill="none" stroke="#8d72e8" stroke-width="8" stroke-linecap="round"/>
+  <path d="M40 270 C110 235, 132 260, 190 270 S280 240, 345 265 S445 307, 515 235 S635 115, 710 170 S780 255, 860 113" fill="none" stroke="#58c7ff" stroke-width="24" opacity=".18" stroke-linecap="round"/>
+  <circle cx="515" cy="220" r="17" fill="#fff" stroke="#8d72e8" stroke-width="4"/>
+  <circle cx="710" cy="155" r="17" fill="#fff" stroke="#2167f1" stroke-width="4"/>
+  <text x="58" y="66" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#5944a5">CĂNG THẲNG KHÔNG ĐI THEO ĐƯỜNG THẲNG</text>
+</svg>
