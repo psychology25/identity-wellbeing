@@ -1,17 +1,41 @@
 (function () {
   'use strict';
 
+  // Soft Music v5 — a gentle, non-looping-feeling musical bed generated with Web Audio API.
+  // It uses a small major-7 / suspended chord palette and a quiet pentatonic melody.
   const state = {
     ctx: null,
     master: null,
     filter: null,
-    nodes: [],
-    lfo: null,
-    lfoGain: null,
     playing: false,
-    mode: 'ambient',
-    volume: 0.14,
+    mode: 'soft-music',
+    volume: 0.10,
+    scheduler: null,
+    nextStepTime: 0,
+    step: 0,
+    activeNodes: new Set(),
   };
+
+  const BPM = 62;
+  const BEAT = 60 / BPM;
+  const STEP = BEAT * 2; // slow half-note pulse
+  const LOOK_AHEAD = 0.15;
+  const SCHEDULE_AHEAD = 0.8;
+
+  const progression = [
+    [261.63, 329.63, 392.00, 493.88], // Cmaj7
+    [220.00, 261.63, 329.63, 392.00], // Am7
+    [174.61, 261.63, 329.63, 392.00], // Fmaj7
+    [196.00, 246.94, 293.66, 392.00], // Gsus2/add4
+  ];
+
+  // C major pentatonic, kept mostly in the middle register.
+  const melody = [
+    523.25, 587.33, 659.25, 587.33,
+    523.25, 493.88, 440.00, 493.88,
+    523.25, 659.25, 698.46, 659.25,
+    587.33, 523.25, 493.88, 440.00,
+  ];
 
   function safeStorageGet(key, fallback) {
     try { return localStorage.getItem(key) || fallback; } catch (_) { return fallback; }
@@ -30,35 +54,35 @@
       <button class="back-top" id="backTop" type="button" aria-label="Lên đầu trang" title="Lên đầu trang">↑</button>
       <aside class="wellbeing-dock" id="wellbeingDock">
         <button class="sound-trigger" id="soundTrigger" type="button" aria-expanded="false" aria-controls="soundPanel">
-          <span class="sound-icon">♪</span>
-          <span class="sound-trigger-text">Âm thanh nền</span>
+          <span class="sound-icon">♫</span>
+          <span class="sound-trigger-text">Nhạc nền nhẹ</span>
           <span class="sound-status-dot" id="soundDot" aria-hidden="true"></span>
         </button>
         <div class="sound-panel" id="soundPanel" hidden>
           <div class="sound-panel-head">
             <div>
               <span class="sound-kicker">TRẢI NGHIỆM</span>
-              <h3>Âm thanh nền nhẹ</h3>
+              <h3>Nhạc nền nhẹ</h3>
             </div>
             <button class="sound-close" id="soundClose" type="button" aria-label="Đóng bảng âm thanh">×</button>
           </div>
 
           <div class="sound-mode-row">
-            <button class="sound-mode active" data-sound-mode="ambient" type="button">
-              <b>Ambient</b><span>Êm · không nhịp</span>
+            <button class="sound-mode active" data-sound-mode="soft-music" type="button">
+              <b>Piano nhẹ</b><span>Chậm · êm · có giai điệu</span>
             </button>
-            <button class="sound-mode" data-sound-mode="432" type="button">
-              <b>432 Hz</b><span>Âm nền tham chiếu</span>
+            <button class="sound-mode" data-sound-mode="ambient" type="button">
+              <b>Ambient</b><span>Nền rất nhẹ · ít giai điệu</span>
             </button>
           </div>
 
           <div class="sound-controls">
-            <button class="sound-play" id="soundPlay" type="button"><span>▶</span> Phát âm thanh</button>
-            <label class="sound-volume"><span>Âm lượng</span><input id="soundVolume" type="range" min="0" max="0.35" step="0.01" value="0.14" /></label>
+            <button class="sound-play" id="soundPlay" type="button"><span>▶</span> Phát nhạc</button>
+            <label class="sound-volume"><span>Âm lượng</span><input id="soundVolume" type="range" min="0" max="0.22" step="0.01" value="0.10" /></label>
           </div>
 
           <div class="sound-state" id="soundState" aria-live="polite">Đang tắt</div>
-          <p class="sound-note"><strong>432 Hz</strong> ở đây chỉ là một lựa chọn thẩm mỹ cho trải nghiệm nghe. Website không xem tần số này như một phương pháp điều trị hay chữa lành.</p>
+          <p class="sound-note">Nhạc được tạo trực tiếp trong trình duyệt, không cần tải file âm thanh. Đây là một lớp trải nghiệm thư giãn tùy chọn, không phải phương pháp điều trị.</p>
           <button class="focus-toggle" id="focusToggle" type="button"><span>☼</span> Chế độ tập trung</button>
         </div>
       </aside>
@@ -66,82 +90,105 @@
     document.body.appendChild(wrapper);
   }
 
-  function setGain(target, value, duration) {
-    if (!target) return;
-    const now = state.ctx.currentTime;
-    target.gain.cancelScheduledValues(now);
-    target.gain.setValueAtTime(target.gain.value, now);
-    target.gain.linearRampToValueAtTime(value, now + duration);
+  function track(node) {
+    state.activeNodes.add(node);
+    node.addEventListener('ended', () => state.activeNodes.delete(node));
+    return node;
   }
 
-  function stopNodes() {
-    state.nodes.forEach((node) => {
-      try { node.stop(); } catch (_) {}
-      try { node.disconnect(); } catch (_) {}
-    });
-    state.nodes = [];
-    [state.lfo, state.lfoGain].forEach((node) => {
-      try { node.stop(); } catch (_) {}
-      try { node.disconnect(); } catch (_) {}
-    });
-    state.lfo = null;
-    state.lfoGain = null;
-  }
+  function createVoice(time, frequency, options = {}) {
+    const {
+      gainValue = 0.035,
+      duration = 2.8,
+      type = 'sine',
+      attack = 0.10,
+      release = 1.8,
+      detune = 0,
+      pan = 0,
+    } = options;
 
-  function makeOsc(freq, type, gainValue, detune = 0, pan = 0) {
-    const osc = state.ctx.createOscillator();
+    const osc = track(state.ctx.createOscillator());
     const gain = state.ctx.createGain();
+    const panner = state.ctx.createStereoPanner ? state.ctx.createStereoPanner() : null;
+
     osc.type = type;
-    osc.frequency.value = freq;
-    osc.detune.value = detune;
-    gain.gain.value = gainValue;
+    osc.frequency.setValueAtTime(frequency, time);
+    osc.detune.setValueAtTime(detune, time);
+
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(Math.max(0.0002, gainValue), time + attack);
+    gain.gain.setValueAtTime(Math.max(0.0002, gainValue), time + Math.max(attack + 0.05, duration - release));
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+
     osc.connect(gain);
-    if (state.ctx.createStereoPanner) {
-      const panner = state.ctx.createStereoPanner();
-      panner.pan.value = pan;
+    if (panner) {
+      panner.pan.setValueAtTime(pan, time);
       gain.connect(panner).connect(state.filter);
     } else {
       gain.connect(state.filter);
     }
-    osc.start();
-    state.nodes.push(osc, gain);
+
+    osc.start(time);
+    osc.stop(time + duration + 0.08);
     return osc;
   }
 
-  function createSound(mode) {
-    stopNodes();
-    state.mode = mode;
+  function scheduleSoftMusic(time, step) {
+    const chord = progression[Math.floor(step / 4) % progression.length];
 
-    const now = state.ctx.currentTime;
-    state.filter.frequency.cancelScheduledValues(now);
-    state.filter.frequency.setValueAtTime(mode === '432' ? 900 : 1150, now);
+    // Warm chord bed: two very quiet voices, spread slightly left/right.
+    createVoice(time, chord[0], { gainValue: 0.025, duration: STEP * 1.9, type: 'sine', attack: 0.35, release: 1.3, pan: -0.10 });
+    createVoice(time, chord[2], { gainValue: 0.018, duration: STEP * 1.9, type: 'sine', attack: 0.45, release: 1.4, pan: 0.10 });
 
-    if (mode === '432') {
-      makeOsc(216, 'sine', 0.06, -1.5, -0.15);
-      const carrier = makeOsc(432, 'sine', 0.035, 0.6, 0.05);
-      makeOsc(864, 'sine', 0.008, -1.2, 0.18);
-      const lfo = state.ctx.createOscillator();
-      const lfoGain = state.ctx.createGain();
-      lfo.frequency.value = 0.035;
-      lfoGain.gain.value = 3.5;
-      lfo.connect(lfoGain).connect(carrier.detune);
-      lfo.start();
-      state.lfo = lfo;
-      state.lfoGain = lfoGain;
-    } else {
-      makeOsc(174, 'sine', 0.07, 1.2, -0.12);
-      makeOsc(220, 'sine', 0.045, -1.8, 0.10);
-      makeOsc(277.18, 'sine', 0.026, 0.7, -0.04);
-      makeOsc(329.63, 'sine', 0.012, -0.9, 0.16);
-      const lfo = state.ctx.createOscillator();
-      const lfoGain = state.ctx.createGain();
-      lfo.frequency.value = 0.018;
-      lfoGain.gain.value = 180;
-      lfo.connect(lfoGain).connect(state.filter.frequency);
-      lfo.start();
-      state.lfo = lfo;
-      state.lfoGain = lfoGain;
+    // Small bell/piano-like melody. The envelope keeps it soft rather than percussive.
+    const note = melody[step % melody.length];
+    createVoice(time + 0.05, note, {
+      gainValue: 0.026,
+      duration: 2.25,
+      type: 'triangle',
+      attack: 0.025,
+      release: 1.65,
+      detune: step % 3 === 0 ? -2 : 1,
+      pan: step % 2 ? 0.08 : -0.06,
+    });
+  }
+
+  function scheduleAmbient(time, step) {
+    const chord = progression[Math.floor(step / 4) % progression.length];
+    createVoice(time, chord[0] / 2, { gainValue: 0.025, duration: STEP * 1.95, type: 'sine', attack: 0.7, release: 1.8, pan: -0.08 });
+    createVoice(time, chord[2] / 2, { gainValue: 0.018, duration: STEP * 1.95, type: 'sine', attack: 0.8, release: 1.8, pan: 0.08 });
+  }
+
+  function scheduler() {
+    if (!state.playing || !state.ctx) return;
+    while (state.nextStepTime < state.ctx.currentTime + SCHEDULE_AHEAD) {
+      if (state.mode === 'soft-music') scheduleSoftMusic(state.nextStepTime, state.step);
+      else scheduleAmbient(state.nextStepTime, state.step);
+      state.nextStepTime += STEP;
+      state.step += 1;
     }
+  }
+
+  function startScheduler() {
+    if (state.scheduler) window.clearInterval(state.scheduler);
+    state.nextStepTime = state.ctx.currentTime + 0.08;
+    state.step = 0;
+    scheduler();
+    state.scheduler = window.setInterval(scheduler, LOOK_AHEAD * 1000);
+  }
+
+  function stopScheduler() {
+    if (state.scheduler) window.clearInterval(state.scheduler);
+    state.scheduler = null;
+  }
+
+  function stopNodes() {
+    stopScheduler();
+    state.activeNodes.forEach((node) => {
+      try { node.stop(); } catch (_) {}
+      try { node.disconnect(); } catch (_) {}
+    });
+    state.activeNodes.clear();
   }
 
   async function ensureAudio() {
@@ -152,35 +199,45 @@
       state.master = state.ctx.createGain();
       state.filter = state.ctx.createBiquadFilter();
       state.filter.type = 'lowpass';
-      state.filter.Q.value = 0.3;
+      state.filter.frequency.value = 2200;
+      state.filter.Q.value = 0.25;
       state.master.gain.value = 0;
       state.filter.connect(state.master).connect(state.ctx.destination);
     }
     if (state.ctx.state === 'suspended') await state.ctx.resume();
   }
 
+  function setMaster(value, duration = 1.2) {
+    if (!state.master || !state.ctx) return;
+    const now = state.ctx.currentTime;
+    state.master.gain.cancelScheduledValues(now);
+    state.master.gain.setValueAtTime(Math.max(0.0001, state.master.gain.value), now);
+    state.master.gain.exponentialRampToValueAtTime(Math.max(0.0001, value), now + duration);
+  }
+
   async function toggleSound() {
     const playButton = document.getElementById('soundPlay');
     const stateLabel = document.getElementById('soundState');
     const dot = document.getElementById('soundDot');
+
     try {
       if (!state.playing) {
         await ensureAudio();
-        createSound(state.mode);
-        setGain(state.master, state.volume, 1.8);
         state.playing = true;
+        setMaster(state.volume, 1.8);
+        startScheduler();
         playButton.innerHTML = '<span>Ⅱ</span> Tạm dừng';
-        stateLabel.textContent = state.mode === '432' ? 'Đang phát · 432 Hz' : 'Đang phát · Ambient';
+        stateLabel.textContent = state.mode === 'soft-music' ? 'Đang phát · Piano nhẹ' : 'Đang phát · Ambient';
         dot.classList.add('on');
       } else {
-        setGain(state.master, 0, 1.2);
+        setMaster(0.0001, 0.9);
         state.playing = false;
-        playButton.innerHTML = '<span>▶</span> Phát âm thanh';
+        playButton.innerHTML = '<span>▶</span> Phát nhạc';
         stateLabel.textContent = 'Đang tắt';
         dot.classList.remove('on');
         window.setTimeout(() => {
           if (!state.playing) stopNodes();
-        }, 1300);
+        }, 1000);
       }
     } catch (error) {
       stateLabel.textContent = 'Trình duyệt không hỗ trợ âm thanh Web Audio.';
@@ -192,12 +249,14 @@
     safeStorageSet('iw-sound-mode', mode);
     document.querySelectorAll('.sound-mode').forEach((btn) => btn.classList.toggle('active', btn.dataset.soundMode === mode));
     const stateLabel = document.getElementById('soundState');
+
     if (state.playing) {
       await ensureAudio();
-      createSound(mode);
-      stateLabel.textContent = mode === '432' ? 'Đang phát · 432 Hz' : 'Đang phát · Ambient';
+      stopNodes();
+      startScheduler();
+      stateLabel.textContent = mode === 'soft-music' ? 'Đang phát · Piano nhẹ' : 'Đang phát · Ambient';
     } else {
-      stateLabel.textContent = mode === '432' ? 'Sẵn sàng · 432 Hz' : 'Sẵn sàng · Ambient';
+      stateLabel.textContent = mode === 'soft-music' ? 'Sẵn sàng · Piano nhẹ' : 'Sẵn sàng · Ambient';
     }
   }
 
@@ -222,12 +281,12 @@
     play.addEventListener('click', toggleSound);
     document.querySelectorAll('.sound-mode').forEach((btn) => btn.addEventListener('click', () => changeMode(btn.dataset.soundMode)));
 
-    volume.value = safeStorageGet('iw-sound-volume', '0.14');
+    volume.value = safeStorageGet('iw-sound-volume', '0.10');
     state.volume = Number(volume.value);
     volume.addEventListener('input', () => {
       state.volume = Number(volume.value);
       safeStorageSet('iw-sound-volume', String(state.volume));
-      if (state.playing) state.master.gain.setTargetAtTime(state.volume, state.ctx.currentTime, 0.15);
+      if (state.playing) state.master.gain.setTargetAtTime(Math.max(0.0001, state.volume), state.ctx.currentTime, 0.18);
     });
 
     focus.addEventListener('click', () => {
@@ -252,8 +311,8 @@
       backTop.classList.toggle('show', window.scrollY > 500);
     }, { passive: true });
 
-    const savedMode = safeStorageGet('iw-sound-mode', 'ambient');
-    changeMode(savedMode);
+    const savedMode = safeStorageGet('iw-sound-mode', 'soft-music');
+    changeMode(savedMode === '432' ? 'soft-music' : savedMode);
   }
 
   document.addEventListener('DOMContentLoaded', () => {
