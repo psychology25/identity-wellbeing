@@ -55,7 +55,7 @@
       <aside class="wellbeing-dock" id="wellbeingDock">
         <button class="sound-trigger" id="soundTrigger" type="button" aria-expanded="false" aria-controls="soundPanel">
           <span class="sound-icon">♫</span>
-          <span class="sound-trigger-text">Nhạc nền nhẹ</span>
+          <span class="sound-trigger-text">Nâng cấp trải nghiệm</span>
           <span class="sound-status-dot" id="soundDot" aria-hidden="true"></span>
         </button>
         <div class="sound-panel" id="soundPanel" hidden>
@@ -72,7 +72,7 @@
               <b>Piano nhẹ</b><span>Chậm · êm · có giai điệu</span>
             </button>
             <button class="sound-mode" data-sound-mode="ambient" type="button">
-              <b>Ambient</b><span>Nền rất nhẹ · ít giai điệu</span>
+              <b>Ambient</b><span>Tần số 432 Hz · Thiền định</span>
             </button>
           </div>
 
@@ -82,7 +82,7 @@
           </div>
 
           <div class="sound-state" id="soundState" aria-live="polite">Đang tắt</div>
-          <p class="sound-note">Nhạc được tạo trực tiếp trong trình duyệt, không cần tải file âm thanh. Đây là một lớp trải nghiệm thư giãn tùy chọn, không phải phương pháp điều trị.</p>
+          <p class="sound-note">Đây là tính năng hỗ trợ nhằm tăng trải nghiệm thư giãn cho người dùng.</p>
           <button class="focus-toggle" id="focusToggle" type="button"><span>☼</span> Chế độ tập trung</button>
         </div>
       </aside>
