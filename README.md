@@ -1,4 +1,4 @@
-# Identity & Wellbeing — Psychology Website
+# Identity Wellbeing 
 
 Website blog giáo dục về khủng hoảng bản sắc cá nhân, căng thẳng tâm lý, nghiên cứu và tự phản tư.
 
